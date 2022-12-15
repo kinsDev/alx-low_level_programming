@@ -1,1 +1,1 @@
-It's getting better
+This is a great tutorial
