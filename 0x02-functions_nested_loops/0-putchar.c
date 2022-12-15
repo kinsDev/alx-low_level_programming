@@ -1,9 +1,9 @@
 #include "main.h"
 
 /**
- * main - Prints putchar
- *
- * Return: Always 0.
+ * main - prints _putchar
+ * is written by kinsley
+ * Return: 0
  */
 int main(void)
 {
