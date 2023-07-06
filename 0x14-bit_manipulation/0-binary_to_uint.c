@@ -5,24 +5,33 @@
  * b is the binary number as a string
  */
 
+#include <stdio.h>
+
 unsigned int binary_to_uint(const char *b)
 {
-    int i;
-    unsigned int j;
+    unsigned int result = 0;
 
-    j = 0;
     if (!b)
-        return (0);
-    for (i = 0; b[i] != '\0'; i++)
+        return 0;
+
+    while (*b)
     {
-        if (b[i] != '0' && b[i] != '1')
-            return (0);
+        if (*b == '0')
+        {
+            result <<= 1; // Left-shift result by 1
+        }
+        else if (*b == '1')
+        {
+            result <<= 1; // Left-shift result by 1
+            result |= 1;  // Set the least significant bit to 1
+        }
+        else
+        {
+            return 0; // Invalid input character
+        }
+
+        b++; // Move to the next character
     }
-    for (i = 0; b[i] != '\0'; i++)
-    {
-        j <<= 1;
-        if (b[i] == '1')
-            j += 1;
-    }
-    return (j);
+
+    return result;
 }
