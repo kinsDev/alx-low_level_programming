@@ -1,6 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-unsigned int binary_to_unsigned_integer(const char *binary);
+unsigned int binary_to_uint(const char *b);
 
 #endif /*MAIN_H*/
