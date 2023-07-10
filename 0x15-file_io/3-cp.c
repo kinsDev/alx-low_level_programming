@@ -8,6 +8,7 @@
  *
  * Return: void
  */
+
 void check_arguments(int argc)
 {
 	if (argc != 3)
@@ -17,6 +18,7 @@ void check_arguments(int argc)
 	}
 }
 
+
 /**
  * check_read - checks if file_from can be read
  * @check: check if true or false
@@ -25,16 +27,20 @@ void check_arguments(int argc)
  *
  * Return: void
  */
-void check_read(ssize_t check, char *file, int fd_from)
+
+void check_readability(ssize_t check, char *file, int fd_from, int fd_to)
 {
 	if (check == -1)
 	{
 		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", file);
 		if (fd_from != -1)
 			close(fd_from);
+		if (fd_to != -1)
+			close(fd_to);
 		exit(98);
 	}
 }
+
 
 /**
  * check_write - checks if file_to can be written
@@ -44,16 +50,20 @@ void check_read(ssize_t check, char *file, int fd_from)
  *
  * Return: void
  */
-void check_write(ssize_t check, char *file, int fd_to)
+
+void check_writability(ssize_t check, char *file, int fd_from, int fd_to)
 {
 	if (check == -1)
 	{
 		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file);
+		if (fd_from != -1)
+			close(fd_from);
 		if (fd_to != -1)
 			close(fd_to);
 		exit(99);
 	}
 }
+
 
 /**
  * check_close - checks if file descriptor was closed properly
@@ -62,7 +72,8 @@ void check_write(ssize_t check, char *file, int fd_to)
  *
  * Return: void
  */
-void check_close(int check, int fd)
+
+void check_closing(int check, int fd)
 {
 	if (check == -1)
 	{
@@ -71,6 +82,7 @@ void check_close(int check, int fd)
 	}
 }
 
+
 /**
  * main - copies the content of a file to another file.
  * @argc: number of arguments passed
@@ -78,42 +90,34 @@ void check_close(int check, int fd)
  *
  * Return: 0 on success
  */
+
 int main(int argc, char *argv[])
 {
 	int fd_from, fd_to, close_to, close_from;
-	ssize_t lenr, lenw;
+	ssize_t len_read, len_write;
 	char buffer[1024];
-	mode_t file_perm = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;
+	mode_t file_perm;
 
 	check_arguments(argc);
-
-	// Open file_from for reading
 	fd_from = open(argv[1], O_RDONLY);
-	check_read((ssize_t)fd_from, argv[1], -1);
-
-	// Create and open file_to for writing
+	check_readability((ssize_t)fd_from, argv[1], -1, -1);
+	file_perm = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;
 	fd_to = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, file_perm);
-	check_write((ssize_t)fd_to, argv[2], fd_from);
-
-	lenr = 1024;
-	while (lenr == 1024)
+	check_writability((ssize_t)fd_to, argv[2], fd_from, -1);
+	len_read = 1024;
+	while (len_read == 1024)
 	{
-		// Read from file_from
-		lenr = read(fd_from, buffer, 1024);
-		check_read(lenr, argv[1], fd_from);
-
-		// Write to file_to
-		lenw = write(fd_to, buffer, lenr);
-		if (lenw != lenr)
-			lenw = -1;
-		check_write(lenw, argv[2], fd_to);
+		len_read = read(fd_from, buffer, 1024);
+		check_readability(len_read, argv[1], fd_from, fd_to);
+		len_write = write(fd_to, buffer, len_read);
+		if (len_write != len_read)
+			len_write = -1;
+		check_writability(len_write, argv[2], fd_from, fd_to);
 	}
-
-	// Close file descriptors
 	close_to = close(fd_to);
 	close_from = close(fd_from);
-	check_close(close_to, fd_to);
-	check_close(close_from, fd_from);
-
+	check_closing(close_to, fd_to);
+	check_closing(close_from, fd_from);
 	return (0);
 }
+
